@@ -1,0 +1,44 @@
+server:
+  host: 0.0.0.0
+  rtsp_port: 8554
+  http_port: 8080
+  device_name: "Simulated ONVIF Camera"
+  manufacturer: "onvif-cam-sim"
+
+streams:
+  - index: 0
+    name: "front-door"
+    width: 1280
+    height: 720
+    framerate: 25
+    bitrate_kbps: 1024
+    network_profile: good
+
+  - index: 1
+    name: "backyard"
+    width: 640
+    height: 480
+    framerate: 15
+    bitrate_kbps: 512
+    network_profile: poor
+
+  - index: 2
+    name: "custom-lossy"
+    width: 1280
+    height: 720
+    framerate: 25
+    bitrate_kbps: 1024
+    network_profile: custom
+    custom_network:
+      drop_probability: 0.15
+      delay_probability: 0.3
+      min_delay_ms: 20
+      max_delay_ms: 250
+      duplicate_probability: 0.02
+      max_kbps: 300
+
+network_presets:
+  perfect:   { drop_probability: 0.0,   delay_probability: 0.0,  min_delay_ms: 0,  max_delay_ms: 0,   duplicate_probability: 0.0,   max_kbps: -1 }
+  good:      { drop_probability: 0.001, delay_probability: 0.05, min_delay_ms: 5,  max_delay_ms: 30,  duplicate_probability: 0.0,   max_kbps: -1 }
+  poor:      { drop_probability: 0.03,  delay_probability: 0.2,  min_delay_ms: 20, max_delay_ms: 150, duplicate_probability: 0.005, max_kbps: 800 }
+  very_poor: { drop_probability: 0.1,   delay_probability: 0.4,  min_delay_ms: 50, max_delay_ms: 400, duplicate_probability: 0.02,  max_kbps: 250 }

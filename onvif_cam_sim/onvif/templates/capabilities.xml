@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+    xmlns:tt="http://www.onvif.org/ver10/schema">
+  <soap:Body>
+    <tds:GetCapabilitiesResponse>
+      <tds:Capabilities>
+        <tt:Device>
+          <tt:XAddr>http://{{ host }}:{{ http_port }}/onvif/device_service</tt:XAddr>
+        </tt:Device>
+        <tt:Media>
+          <tt:XAddr>http://{{ host }}:{{ http_port }}/onvif/media_service</tt:XAddr>
+          <tt:StreamingCapabilities>
+            <tt:RTP_TCP>true</tt:RTP_TCP>
+            <tt:RTP_RTSP_TCP>true</tt:RTP_RTSP_TCP>
+          </tt:StreamingCapabilities>
+        </tt:Media>
+      </tds:Capabilities>
+    </tds:GetCapabilitiesResponse>
+  </soap:Body>
+</soap:Envelope>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:tds="http://www.onvif.org/ver10/device/wsdl"
+    xmlns:tt="http://www.onvif.org/ver10/schema">
+  <soap:Body>
+    <tds:GetSystemDateAndTimeResponse>
+      <tds:SystemDateAndTime>
+        <tt:DateTimeType>Manual</tt:DateTimeType>
+        <tt:DaylightSavings>false</tt:DaylightSavings>
+        <tt:UTCDateTime>
+          <tt:Time>
+            <tt:Hour>{{ now.hour }}</tt:Hour>
+            <tt:Minute>{{ now.minute }}</tt:Minute>
+            <tt:Second>{{ now.second }}</tt:Second>
+          </tt:Time>
+          <tt:Date>
+            <tt:Year>{{ now.year }}</tt:Year>
+            <tt:Month>{{ now.month }}</tt:Month>
+            <tt:Day>{{ now.day }}</tt:Day>
+          </tt:Date>
+        </tt:UTCDateTime>
+      </tds:SystemDateAndTime>
+    </tds:GetSystemDateAndTimeResponse>
+  </soap:Body>
+</soap:Envelope>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope"
+    xmlns:trt="http://www.onvif.org/ver10/media/wsdl"
+    xmlns:tt="http://www.onvif.org/ver10/schema">
+  <soap:Body>
+    <trt:GetProfilesResponse>
+      {% for stream in streams %}
+      <trt:Profiles token="profile{{ stream.index }}" fixed="true">
+        <tt:Name>{{ stream.name }}</tt:Name>
+        <tt:VideoSourceConfiguration token="vsc{{ stream.index }}">
+          <tt:Name>VideoSource{{ stream.index }}</tt:Name>
+          <tt:SourceToken>vs{{ stream.index }}</tt:SourceToken>
+          <tt:Bounds x="0" y="0" width="{{ stream.width }}" height="{{ stream.height }}"/>
+        </tt:VideoSourceConfiguration>
+        <tt:VideoEncoderConfiguration token="vec{{ stream.index }}">
+          <tt:Name>VideoEncoder{{ stream.index }}</tt:Name>
+          <tt:Encoding>H264</tt:Encoding>
+          <tt:Resolution>
+            <tt:Width>{{ stream.width }}</tt:Width>
+            <tt:Height>{{ stream.height }}</tt:Height>
+          </tt:Resolution>
+          <tt:RateControl>
+            <tt:FrameRateLimit>{{ stream.framerate }}</tt:FrameRateLimit>
+            <tt:BitrateLimit>{{ stream.bitrate_kbps }}</tt:BitrateLimit>
+          </tt:RateControl>
+        </tt:VideoEncoderConfiguration>
+      </trt:Profiles>
+      {% endfor %}
+    </trt:GetProfilesResponse>
+  </soap:Body>
+</soap:Envelope>
