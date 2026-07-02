@@ -8,21 +8,35 @@
       <trt:Profiles token="profile{{ stream.index }}" fixed="true">
         <tt:Name>{{ stream.name }}</tt:Name>
         <tt:VideoSourceConfiguration token="vsc{{ stream.index }}">
-          <tt:Name>VideoSource{{ stream.index }}</tt:Name>
+          <tt:Name>VideoSourceConfig{{ stream.index }}</tt:Name>
+          <tt:UseCount>1</tt:UseCount>
           <tt:SourceToken>vs{{ stream.index }}</tt:SourceToken>
           <tt:Bounds x="0" y="0" width="{{ stream.width }}" height="{{ stream.height }}"/>
         </tt:VideoSourceConfiguration>
         <tt:VideoEncoderConfiguration token="vec{{ stream.index }}">
-          <tt:Name>VideoEncoder{{ stream.index }}</tt:Name>
+          <tt:Name>VideoEncoderConfig{{ stream.index }}</tt:Name>
+          <tt:UseCount>1</tt:UseCount>
           <tt:Encoding>H264</tt:Encoding>
           <tt:Resolution>
             <tt:Width>{{ stream.width }}</tt:Width>
             <tt:Height>{{ stream.height }}</tt:Height>
           </tt:Resolution>
+          <tt:Quality>5.0</tt:Quality>
           <tt:RateControl>
             <tt:FrameRateLimit>{{ stream.framerate }}</tt:FrameRateLimit>
+            <tt:EncodingInterval>1</tt:EncodingInterval>
             <tt:BitrateLimit>{{ stream.bitrate_kbps }}</tt:BitrateLimit>
           </tt:RateControl>
+          <tt:Multicast>
+            <tt:Address>
+              <tt:Type>IPv4</tt:Type>
+              <tt:IPv4Address>0.0.0.0</tt:IPv4Address>
+            </tt:Address>
+            <tt:Port>0</tt:Port>
+            <tt:TTL>1</tt:TTL>
+            <tt:AutoStart>false</tt:AutoStart>
+          </tt:Multicast>
+          <tt:SessionTimeout>PT60S</tt:SessionTimeout>
         </tt:VideoEncoderConfiguration>
       </trt:Profiles>
       {% endfor %}
