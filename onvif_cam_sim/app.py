@@ -12,7 +12,13 @@ from aiohttp import web
 from onvif_cam_sim.config import AppConfig, load_config
 from onvif_cam_sim.onvif.device_service import make_device_service_handler
 from onvif_cam_sim.onvif.discovery import start_discovery_responder
+from onvif_cam_sim.onvif.event_service import (
+    EventService,
+    make_event_service_handler,
+    make_pullpoint_handler,
+)
 from onvif_cam_sim.onvif.media_service import make_media_service_handler
+from onvif_cam_sim.onvif.motion_events import MotionEventGenerator
 from onvif_cam_sim.rtsp_server import OnvifSimRtspServer
 
 logger = logging.getLogger(__name__)
@@ -31,13 +37,22 @@ def _detect_advertise_host(configured_host: str) -> str:
         sock.close()
 
 
-def build_onvif_http_app(config: AppConfig, advertise_host: str) -> web.Application:
+def build_onvif_http_app(
+    config: AppConfig, advertise_host: str, events: EventService
+) -> web.Application:
     app = web.Application()
     app.router.add_post(
         "/onvif/device_service", make_device_service_handler(config, advertise_host)
     )
     app.router.add_post(
         "/onvif/media_service", make_media_service_handler(config, advertise_host)
+    )
+    app.router.add_post(
+        "/onvif/event_service",
+        make_event_service_handler(advertise_host, config.server.http_port, events),
+    )
+    app.router.add_post(
+        "/onvif/events/pullpoint/{sub_id}", make_pullpoint_handler(events)
     )
     return app
 
@@ -49,13 +64,17 @@ async def run(config: AppConfig) -> None:
     rtsp_server = OnvifSimRtspServer(config)
     rtsp_server.start()
 
-    http_app = build_onvif_http_app(config, advertise_host)
+    events = EventService()
+    motion_generator = MotionEventGenerator(config, events.broadcast)
+    motion_generator.start()
+
+    http_app = build_onvif_http_app(config, advertise_host, events)
     runner = web.AppRunner(http_app)
     await runner.setup()
     site = web.TCPSite(runner, config.server.host, config.server.http_port)
     await site.start()
     logger.info(
-        "ONVIF SOAP server listening on http://%s:%d/onvif/{device,media}_service",
+        "ONVIF SOAP server listening on http://%s:%d/onvif/{device,media,event}_service",
         config.server.host,
         config.server.http_port,
     )
@@ -72,6 +91,7 @@ async def run(config: AppConfig) -> None:
     finally:
         discovery_transport.close()
         await runner.cleanup()
+        motion_generator.stop()
         rtsp_server.stop()
 
 

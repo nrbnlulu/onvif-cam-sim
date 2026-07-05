@@ -35,9 +35,20 @@ class StreamConfig:
 
 
 @dataclass
+class EventsConfig:
+    enabled: bool = True
+    min_interval_s: float = 5.0
+    max_interval_s: float = 15.0
+    active_duration_min_s: float = 2.0
+    active_duration_max_s: float = 6.0
+    classes: list[str] = field(default_factory=lambda: ["human", "vehicle", "animal", "motion"])
+
+
+@dataclass
 class AppConfig:
     server: ServerConfig = field(default_factory=ServerConfig)
     streams: list[StreamConfig] = field(default_factory=list)
+    events: EventsConfig = field(default_factory=EventsConfig)
 
 
 def _resolve_network(stream_dict: dict, presets: dict[str, NetworkProfile]) -> NetworkProfile:
@@ -97,4 +108,18 @@ def load_config(path: str | Path) -> AppConfig:
         for s in raw.get("streams") or []
     ]
 
-    return AppConfig(server=server, streams=streams)
+    events_dict = raw.get("events") or {}
+    events = EventsConfig(
+        enabled=events_dict.get("enabled", EventsConfig.enabled),
+        min_interval_s=events_dict.get("min_interval_s", EventsConfig.min_interval_s),
+        max_interval_s=events_dict.get("max_interval_s", EventsConfig.max_interval_s),
+        active_duration_min_s=events_dict.get(
+            "active_duration_min_s", EventsConfig.active_duration_min_s
+        ),
+        active_duration_max_s=events_dict.get(
+            "active_duration_max_s", EventsConfig.active_duration_max_s
+        ),
+        classes=events_dict.get("classes", ["human", "vehicle", "animal", "motion"]),
+    )
+
+    return AppConfig(server=server, streams=streams, events=events)

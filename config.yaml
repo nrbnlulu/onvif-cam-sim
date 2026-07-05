@@ -42,3 +42,11 @@ network_presets:
   good:      { drop_probability: 0.001, delay_probability: 0.05, min_delay_ms: 5,  max_delay_ms: 30,  duplicate_probability: 0.0,   max_kbps: -1 }
   poor:      { drop_probability: 0.03,  delay_probability: 0.2,  min_delay_ms: 20, max_delay_ms: 150, duplicate_probability: 0.005, max_kbps: 800 }
   very_poor: { drop_probability: 0.1,   delay_probability: 0.4,  min_delay_ms: 50, max_delay_ms: 400, duplicate_probability: 0.02,  max_kbps: 250 }
+
+events:
+  enabled: true
+  min_interval_s: 5
+  max_interval_s: 15
+  active_duration_min_s: 2
+  active_duration_max_s: 6
+  classes: [human, vehicle, animal, motion]

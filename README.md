@@ -4,8 +4,10 @@ Simulates a multi-channel ONVIF camera: a GStreamer-based RTSP server serving
 synthetic video (live clock overlay + stream index) on multiple mount points,
 each with an independently configurable simulated network quality (packet
 loss, delay/jitter, duplication, bandwidth cap), plus a minimal ONVIF SOAP
-server (Device + Media services) and a WS-Discovery responder so ONVIF
-clients/NVRs can discover and pull the streams.
+server (Device + Media + Events services) and a WS-Discovery responder so
+ONVIF clients/NVRs can discover and pull the streams, and a background
+generator that fires simulated motion-detection events (human/vehicle/animal)
+through a WS-BaseNotification PullPoint subscription.
 
 ## Requirements
 
@@ -23,9 +25,10 @@ uv run python3 main.py --config config.yaml
 
 This starts:
 - RTSP server on `rtsp://<host>:8554/streamN` (one per configured stream)
-- ONVIF SOAP endpoints on `http://<host>:8080/onvif/device_service` and
-  `/onvif/media_service`
+- ONVIF SOAP endpoints on `http://<host>:8080/onvif/device_service`,
+  `/onvif/media_service`, and `/onvif/event_service`
 - A WS-Discovery responder on UDP multicast `239.255.255.250:3702`
+- A background motion-event generator feeding the Events PullPoint service
 
 ## Viewing a stream directly
 
@@ -71,3 +74,32 @@ degradation, not bit-exact `netem` emulation.
 Add or remove streams by editing the `streams` list; each gets its own RTSP
 mount point at `/stream<index>` and its own ONVIF media profile
 (`profile<index>`).
+
+## Motion detection events
+
+A background generator (`onvif_cam_sim/onvif/motion_events.py`) periodically
+picks a random stream and object class, fires a `PropertyOperation="Changed"`
+notification with the class's boolean field set `true`, waits a random
+"active" duration, then fires it again `false` — simulating a motion event
+starting and ending. Events are delivered through a minimal WS-BaseNotification
+PullPoint implementation:
+
+1. `POST /onvif/event_service` with `CreatePullPointSubscription` returns a
+   per-subscription pull address at `/onvif/events/pullpoint/<id>`.
+2. `POST` to that address with `PullMessages` (or `Renew`/`Unsubscribe`)
+   drains that subscription's queued notifications.
+
+Each of the three streams is a `<source>`; every active subscription receives
+every event (there's no per-stream subscription filtering). Topics emitted:
+
+| Class     | Topic                                      | Data field  |
+|-----------|---------------------------------------------|-------------|
+| human     | `tns1:RuleEngine/HumanDetector/Human`        | `IsHuman`   |
+| vehicle   | `tns1:RuleEngine/VehicleDetector/Vehicle`    | `IsVehicle` |
+| animal    | `tns1:RuleEngine/AnimalDetector/Animal`      | `IsAnimal`  |
+| motion    | `tns1:RuleEngine/MotionDetector/Motion`      | `IsMotion`  |
+
+Configure timing and which classes fire under the `events:` key in
+`config.yaml` (`enabled`, `min_interval_s`/`max_interval_s` between events,
+`active_duration_min_s`/`active_duration_max_s` for how long a detection stays
+"true", and `classes` to restrict/reweight which object types occur).

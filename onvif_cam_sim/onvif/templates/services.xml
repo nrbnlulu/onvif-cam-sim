@@ -14,6 +14,11 @@
         <tds:XAddr>http://{{ host }}:{{ http_port }}/onvif/media_service</tds:XAddr>
         <tds:Version><tt:Major>2</tt:Major><tt:Minor>5</tt:Minor></tds:Version>
       </tds:Service>
+      <tds:Service>
+        <tds:Namespace>http://www.onvif.org/ver10/events/wsdl</tds:Namespace>
+        <tds:XAddr>http://{{ host }}:{{ http_port }}/onvif/event_service</tds:XAddr>
+        <tds:Version><tt:Major>2</tt:Major><tt:Minor>5</tt:Minor></tds:Version>
+      </tds:Service>
     </tds:GetServicesResponse>
   </soap:Body>
 </soap:Envelope>
